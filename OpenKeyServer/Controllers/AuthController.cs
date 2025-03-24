@@ -80,7 +80,8 @@ namespace OpenKeyServer.Controllers
             var tokenString = tokenHandler.WriteToken(token);
             var options = new MemoryCacheEntryOptions()
                 .SetSlidingExpiration(TimeSpan.FromMinutes(5));
-            var id = Guid.NewGuid().ToString("N");
+            var random = new Random();
+            string id = random.Next(0, 1000000).ToString("D6");
             memoryCache.Set(id, tokenString, options);
             return Ok(new CommonResponse()
             {

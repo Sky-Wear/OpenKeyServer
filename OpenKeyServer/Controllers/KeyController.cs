@@ -36,7 +36,7 @@ namespace OpenKeyServer.Controllers
             return Ok(new CommonResponse { code = (int)Code.Success });
         }
         [Authorize]
-        [HttpPost("v2/update")]
+        [HttpPost("update/v2")]
         public async Task<IActionResult> SetKeyV2([FromBody] SetKeyV2 request)
         {
             var keyId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -57,7 +57,7 @@ namespace OpenKeyServer.Controllers
             return Ok(new CommonResponse { code = (int)Code.Success });
         }
         [Authorize]
-        [HttpPost("v3/update")]
+        [HttpPost("update/v3")]
         public async Task<IActionResult> SetKeyV3([FromBody] SetKeyV3 request)
         {
             var keyId = User.FindFirstValue(ClaimTypes.NameIdentifier);
