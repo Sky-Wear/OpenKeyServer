@@ -11,4 +11,5 @@ public class ApplicationUser
     [StringLength(300)]
     public string Key { get; set; } = "";
     public int Type { get; set; } = -1;
+    public long LastUpdated { get; set; } = -1;
 }

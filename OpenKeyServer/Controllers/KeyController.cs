@@ -32,6 +32,7 @@ namespace OpenKeyServer.Controllers
                 return Ok(new CommonResponse { code = (int)Code.InvalidRequest });
             }
             user.Key = value;
+            user.LastUpdated = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
             await context.SaveChangesAsync();
             return Ok(new CommonResponse { code = (int)Code.Success });
         }
@@ -53,6 +54,7 @@ namespace OpenKeyServer.Controllers
                 context.Users.Add(user);
             }
             user.Key = $"{request.keyId}:{request.rsaPublicKey}";
+            user.LastUpdated = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
             await context.SaveChangesAsync();
             return Ok(new CommonResponse { code = (int)Code.Success });
         }
@@ -74,6 +76,7 @@ namespace OpenKeyServer.Controllers
                 context.Users.Add(user);
             }
             user.Key = $"{request.keyId}:{request.aesKey}:{request.aesKey}";
+            user.LastUpdated = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
             await context.SaveChangesAsync();
             return Ok(new CommonResponse { code = (int)Code.Success });
         }
@@ -97,7 +100,8 @@ namespace OpenKeyServer.Controllers
                     data = new GetKeyResponse()
                     {
                         Key = user.Key,
-                        Type = user.Type
+                        Type = user.Type,
+                        LastUpdated = user.LastUpdated
                     }
                 });
             }
@@ -109,6 +113,44 @@ namespace OpenKeyServer.Controllers
                     data = null
                 });
             }
+        }
+
+        [HttpPost("sync_key")]
+        public async Task<IActionResult> SyncKey([FromBody] SyncKeyRequest request)
+        {
+            if (request.apiSecret != configuration["Secret"])
+            {
+                return Ok(new CommonResponse()
+                {
+                    code = (int)Code.AuthFailed
+                });
+            }
+
+            long fromTimestamp = request.fromTimestamp ?? -1;
+
+            var users = await context.Users
+                .Where(u => u.LastUpdated > fromTimestamp)
+                .ToListAsync();
+
+            var items = users.Select(u => new KeyItemResponse
+            {
+                Id = u.Id,
+                Value = new GetKeyResponse
+                {
+                    Key = u.Key,
+                    Type = u.Type, 
+                    LastUpdated = u.LastUpdated
+                }
+            }).ToList();
+
+            return Ok(new CommonResponse()
+            {
+                code = (int)Code.Success,
+                data = new SyncKeyResponse
+                {
+                    Items = items
+                }
+            });
         }
     }
 }
