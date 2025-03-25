@@ -12,7 +12,7 @@ namespace OpenKeyServer.Controllers;
 
 [Route("[controller]")]
 [ApiController]
-public class AuthController(IConfiguration configuration,IMemoryCache memoryCache) : ControllerBase
+public class AuthController(IConfiguration configuration, IMemoryCache memoryCache) : ControllerBase
 {
     [HttpPost("get_token")]
     public IActionResult GenerateToken([FromBody] GenerateAuthToken request)
@@ -24,6 +24,7 @@ public class AuthController(IConfiguration configuration,IMemoryCache memoryCach
                 code = (int)Code.AuthFailed
             });
         }
+
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, request.keyId ?? ""),
@@ -50,6 +51,7 @@ public class AuthController(IConfiguration configuration,IMemoryCache memoryCach
             }
         });
     }
+
     [HttpPost("get_code")]
     public IActionResult GeneratePickupCode([FromBody] GenerateCodeRequest request)
     {
@@ -60,6 +62,7 @@ public class AuthController(IConfiguration configuration,IMemoryCache memoryCach
                 code = (int)Code.AuthFailed
             });
         }
+
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, request.keyId ?? ""),
@@ -79,7 +82,8 @@ public class AuthController(IConfiguration configuration,IMemoryCache memoryCach
         var tokenString = tokenHandler.WriteToken(token);
         var options = new MemoryCacheEntryOptions()
             .SetSlidingExpiration(TimeSpan.FromMinutes(5));
-        var id = Guid.NewGuid().ToString("N");
+        var random = new Random();
+        string id = random.Next(0, 1000000).ToString("D6");
         memoryCache.Set(id, tokenString, options);
         return Ok(new CommonResponse
         {
