@@ -102,7 +102,7 @@ public class KeyController(ApplicationDbContext context,IKeyValidation keyValida
         }
         return Ok(new CommonResponse
         {
-            code = (int)Code.InvalidRequest,
+            code = (int)Code.NoSuchSource,
             data = null
         });
     }

@@ -5,7 +5,8 @@ public enum Code
     Success = 200,
     InternalError = 10000,
     AuthFailed = 1000,
-    InvalidRequest = 1001
+    InvalidRequest = 1001, 
+    NoSuchSource = 1002, 
 }
 
 public static class CodeHelper
@@ -21,6 +22,10 @@ public static class CodeHelper
             case Code.InternalError:
             {
                 return "server internal error";
+            }
+            case Code.NoSuchSource:
+            {
+                return "no such source";
             }
             case Code.AuthFailed:
             case Code.InvalidRequest:
