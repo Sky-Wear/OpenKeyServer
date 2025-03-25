@@ -83,7 +83,7 @@ public class AuthController(IConfiguration configuration, IMemoryCache memoryCac
         var options = new MemoryCacheEntryOptions()
             .SetSlidingExpiration(TimeSpan.FromMinutes(5));
         var random = new Random();
-        string id = random.Next(0, 1000000).ToString("D6");
+        var id = random.Next(0, 1000000).ToString("D6");
         memoryCache.Set(id, tokenString, options);
         return Ok(new CommonResponse
         {
