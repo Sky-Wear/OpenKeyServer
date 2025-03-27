@@ -71,7 +71,7 @@ public class KeyController(ApplicationDbContext context,IKeyValidation keyValida
             context.Users.Add(user);
         }
         user.Key = $"{request.keyId}:{request.aesKey}:{request.aesKey}";
-        user.LastUpdated = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+        user.LastUpdated = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
         await context.SaveChangesAsync();
         return Ok(new CommonResponse { code = (int)Code.Success });
     }
