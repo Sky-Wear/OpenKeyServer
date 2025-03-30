@@ -27,6 +27,7 @@ public class KeyController(ApplicationDbContext context,IKeyValidation keyValida
             return Ok(new CommonResponse { code = (int)Code.InvalidRequest });
         }
         user.Key = value;
+        user.Type = -1;
         user.LastUpdated = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
         await context.SaveChangesAsync();
         return Ok(new CommonResponse { code = (int)Code.Success });
@@ -49,6 +50,7 @@ public class KeyController(ApplicationDbContext context,IKeyValidation keyValida
             context.Users.Add(user);
         }
         user.Key = $"{request.keyId}:{request.rsaPublicKey}";
+        user.Type = 1;
         user.LastUpdated = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
         await context.SaveChangesAsync();
         return Ok(new CommonResponse { code = (int)Code.Success });
@@ -58,7 +60,7 @@ public class KeyController(ApplicationDbContext context,IKeyValidation keyValida
     public async Task<IActionResult> SetKeyV3([FromBody] SetKeyV3 request)
     {
         var keyId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!keyValidation.ValidateKey($"{request.keyId}:{request.aesKey}:{request.aesKey}", request.bindNumber,
+        if (!keyValidation.ValidateKey($"{request.keyId}:{request.aesKey}:{request.eebbkKey}", request.bindNumber,
                 request.chipId))
         {
             return Ok(new CommonResponse { code = (int)Code.InvalidRequest });
@@ -70,7 +72,32 @@ public class KeyController(ApplicationDbContext context,IKeyValidation keyValida
             user = new ApplicationUser { Id = keyId??"" };
             context.Users.Add(user);
         }
-        user.Key = $"{request.keyId}:{request.aesKey}:{request.aesKey}";
+        user.Key = $"{request.keyId}:{request.aesKey}:{request.eebbkKey}";
+        user.Type = 2;
+        user.LastUpdated = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
+        await context.SaveChangesAsync();
+        return Ok(new CommonResponse { code = (int)Code.Success });
+    }
+
+    [Authorize]
+    [HttpPost("update/v3full")]
+    public async Task<IActionResult> SetKeyV3Full([FromBody] SetKeyV3Full request)
+    {
+        var keyId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!keyValidation.ValidateKey($"{request.keyId}:{request.fullAesKey}:{request.rsaPublicKey}", request.bindNumber,
+                request.chipId))
+        {
+            return Ok(new CommonResponse { code = (int)Code.InvalidRequest });
+        }
+
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == keyId);
+        if (user == null)
+        {
+            user = new ApplicationUser { Id = keyId ?? "" };
+            context.Users.Add(user);
+        }
+        user.Key = $"{request.keyId}:{request.fullAesKey}:{request.rsaPublicKey}";
+        user.Type = 3;
         user.LastUpdated = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
         await context.SaveChangesAsync();
         return Ok(new CommonResponse { code = (int)Code.Success });
