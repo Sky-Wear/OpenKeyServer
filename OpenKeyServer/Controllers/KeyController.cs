@@ -28,7 +28,7 @@ public class KeyController(ApplicationDbContext context,IKeyValidation keyValida
         }
         user.Key = value;
         user.Type = -1;
-        user.LastUpdated = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+        user.LastUpdated = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
         await context.SaveChangesAsync();
         return Ok(new CommonResponse { code = (int)Code.Success });
     }
@@ -51,7 +51,7 @@ public class KeyController(ApplicationDbContext context,IKeyValidation keyValida
         }
         user.Key = $"{request.keyId}:{request.rsaPublicKey}";
         user.Type = 1;
-        user.LastUpdated = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+        user.LastUpdated = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
         await context.SaveChangesAsync();
         return Ok(new CommonResponse { code = (int)Code.Success });
     }
